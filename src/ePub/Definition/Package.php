@@ -16,9 +16,9 @@ use ePub\Definition\ManifestItem;
 class Package
 {
     public $version;
-    
+
     public $opfDirectory;
-    
+
     public $metadata;
 
     public $manifest;
@@ -26,7 +26,7 @@ class Package
     public $spine;
 
     public $guide;
-    
+
     public $navigation;
 
     public function __construct()
@@ -57,7 +57,7 @@ class Package
     {
         return $this->guide;
     }
-    
+
     public function getNavigation()
     {
         return $this->navigation;

@@ -51,15 +51,15 @@ class ZipFileLoader
 
         $opfResource = new OpfResource($data, $resource);
         $package = $opfResource->bind();
-        
+
         $package->opfDirectory = dirname($opfFile);
-        
+
         if ($package->navigation->src->href) {
             $ncx = $resource->get($package->navigation->src->href);
             $ncxResource = new NcxResource($ncx);
             $package = $ncxResource->bind($package);
         }
-        
+
         return $package;
     }
 }

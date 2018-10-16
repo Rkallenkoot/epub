@@ -17,12 +17,10 @@ use ePub\Exception\InvalidArgumentException;
 
 class Writer
 {
-	private $package;
-	
-	public function __construct(Package $package)
-	{
-		$this->package = $package;
-	}
-	
-	
+    private $package;
+
+    public function __construct(Package $package)
+    {
+        $this->package = $package;
+    }
 }

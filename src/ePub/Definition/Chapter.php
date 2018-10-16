@@ -10,7 +10,7 @@ class Chapter
     public $src;
     public $position;
     public $children;
-    
+
     public function __construct($title, $pos, $src = null)
     {
         $this->title = str_replace(array("\n", "\r"), ' ', $title);
@@ -18,8 +18,8 @@ class Chapter
         $this->position = (int) $pos;
         $this->children = array();
     }
-    
-    
+
+
     public function addChild(Chapter $child)
     {
         $this->children[] = $child;
