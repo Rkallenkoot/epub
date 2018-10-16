@@ -72,11 +72,11 @@ class OpfResource
     public function bind(Package $package = null)
     {
         $package = $package ?: new Package();
-        $xml     = $this->xml;
+        $xml = $this->getNamespacedChildren($this->xml, NamespaceRegistry::NAMESPACE_OPF);
 
         // Epub version:
         $package->version = (string) $xml['version'];
-        
+
         $this->processMetadataElement($xml->metadata, $package->metadata);
         $this->processManifestElement($xml->manifest, $package->manifest);
         $this->processSpineElement($xml->spine, $package->spine, $package->manifest, $package->navigation);
@@ -101,27 +101,33 @@ class OpfResource
         }
     }
 
-    private function processManifestElement(SimpleXmlElement $xml, Manifest $manifest)
+    private function processManifestElement(SimpleXMLElement $xml, Manifest $manifest)
     {
-        foreach ($xml->item as $child) {
+        $children = $this->getNamespacedChildren($xml, NamespaceRegistry::NAMESPACE_OPF);
+
+        foreach ($children->item as $child) {
+            $attributes = $child->attributes();
             $item = new ManifestItem();
 
-            $item->id       = (string) $child['id'];
-            $item->href     = (string) $child['href'];
-            $item->type     = (string) $child['media-type'];
-            $item->fallback = (string) $child['fallback'];
+            $item->id       = (string) $attributes['id'];
+            $item->href     = (string) $attributes['href'];
+            $item->type     = (string) $attributes['media-type'];
+            $item->fallback = (string) $attributes['fallback'];
 
             $this->addContentGetter($item);
 
             $manifest->add($item);
         }
+
     }
 
     private function processSpineElement(SimpleXMLElement $xml, Spine $spine, Manifest $manifest, Navigation $navigation)
     {
         $position = 1;
-        foreach ($xml->itemref as $child) {
-            $id = (string) $child['idref'];
+        $children = $this->getNamespacedChildren($xml, NamespaceRegistry::NAMESPACE_OPF);
+
+        foreach ($children->itemref as $child) {
+            $id = (string) $child->attributes()->idref;
             $manifestItem = $manifest->get($id);
             if (!$linear = $child['linear']) {
                 $linear = 'yes';
@@ -142,9 +148,9 @@ class OpfResource
 
             $position++;
         }
-        
+
         $ncxId = ($xml['toc']) ? (string) $xml['toc'] : 'ncx';
-        
+
         if ($manifest->has($ncxId)) {
             $navigation->src = $manifest->get($ncxId);
         }
@@ -152,6 +158,8 @@ class OpfResource
 
     private function processGuideElement(SimpleXMLElement $xml, Guide $guide)
     {
+        $children = $this->getNamespacedChildren($xml, NamespaceRegistry::NAMESPACE_OPF);
+
         foreach ($xml->reference as $child) {
             $item = new GuideItem();
 
@@ -212,4 +220,14 @@ class OpfResource
             });
         }
     }
+
+    private function getNamespacedChildren(SimpleXMLElement $xml, $namespace)
+    {
+        $xmlNamespaces = $xml->getNamespaces(true);
+
+        return in_array($namespace, $xmlNamespaces) ?
+            $xml->children($xmlNamespaces[array_search($namespace, $xmlNamespaces)]) :
+            $xml;
+    }
+
 }
