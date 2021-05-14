@@ -23,7 +23,10 @@ class ManifestItem implements ItemInterface
 
     public $fallback;
 
+    public $properties;
+
     private $content;
+
 
     public function getIdentifier()
     {
@@ -44,5 +47,16 @@ class ManifestItem implements ItemInterface
         }
 
         return $this->content;
+    }
+
+    public function setProperties($properties)
+    {
+        if (empty($properties)) {
+            $this->properties = [];
+        } elseif (is_array($properties)) {
+            $this->properties = $properties;
+        } else {
+            $this->properties = explode(' ', $properties);
+        }
     }
 }

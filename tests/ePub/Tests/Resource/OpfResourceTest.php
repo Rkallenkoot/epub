@@ -39,11 +39,10 @@ class OpfResourceTest extends BaseTest
         );
     }
 
-    /**
-     * @expectedException \ePub\Exception\InvalidArgumentException
-     */
     public function testInvalidOpenPackagingFormatInput()
     {
+        $this->expectException(\ePub\Exception\InvalidArgumentException::class);
+
         new OpfResource(null);
     }
 }

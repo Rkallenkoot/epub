@@ -25,7 +25,6 @@ use ePub\Definition\GuideItem;
 use ePub\Definition\Navigation;
 use ePub\Exception\InvalidArgumentException;
 
-
 class OpfResource
 {
     /**
@@ -72,7 +71,7 @@ class OpfResource
     public function bind(Package $package = null)
     {
         $package = $package ?: new Package();
-        $xml = $this->getNamespacedChildren($this->xml, NamespaceRegistry::NAMESPACE_OPF);
+        $xml = $this->xml;
 
         // Epub version:
         $package->version = (string) $xml['version'];
@@ -113,12 +112,12 @@ class OpfResource
             $item->href     = (string) $attributes['href'];
             $item->type     = (string) $attributes['media-type'];
             $item->fallback = (string) $attributes['fallback'];
+            $item->setProperties($attributes['properties']);
 
             $this->addContentGetter($item);
 
             $manifest->add($item);
         }
-
     }
 
     private function processSpineElement(SimpleXMLElement $xml, Spine $spine, Manifest $manifest, Navigation $navigation)
@@ -227,7 +226,7 @@ class OpfResource
 
         return in_array($namespace, $xmlNamespaces) ?
             $xml->children($xmlNamespaces[array_search($namespace, $xmlNamespaces)]) :
-            $xml;
+            $xml->children();
     }
 
 }

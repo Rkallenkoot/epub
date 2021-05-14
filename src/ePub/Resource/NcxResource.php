@@ -58,7 +58,11 @@ class NcxResource
         $package = $package ?: new Package();
 
         if (in_array(static::NS_NCX, $this->namespaces)) {
-            $navMap = $this->xml->children($this->namespaces[array_search(static::NS_NCX, $this->namespaces)]);
+            $navMap = $this->xml->children(
+                $this->namespaces[
+                  array_search(static::NS_NCX, $this->namespaces)
+                ],
+            )->navMap;
         } else {
             $navMap = $this->xml->navMap;
         }
