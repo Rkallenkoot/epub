@@ -47,7 +47,7 @@ class ZipFileResource
 
     public function all()
     {
-        $result = array();
+        $result = [];
 
         for ($i = 0; $i < $this->zipFile->numFiles; $i++){
             $item = $this->zipFile->statIndex($i);

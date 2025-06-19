@@ -1,18 +1,8 @@
 <?php
 
-/*
- * This file is part of the ePub Reader package
- *
- * (c) Justin Rainbow <justin.rainbow@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace ePub\Resource;
 
-use SimpleXMLElement;
-use ePub\NamespaceRegistry;
+use Saloon\XmlWrangler\XmlReader;
 use ePub\Definition\Package;
 use ePub\Definition\Metadata;
 use ePub\Definition\MetadataItem;
@@ -27,206 +17,136 @@ use ePub\Exception\InvalidArgumentException;
 
 class OpfResource
 {
-    /**
-     * @var \SimpleXMLElement
-     */
-    private $xml;
+    private XmlReader $reader;
 
-    /**
-     * Array of XML namespaces found in document
-     *
-     * @var array
-     */
-    private $namespaces;
-
-    /**
-     * Constructor
-     *
-     * @param \SimpleXMLElement|string $data
-     * @param ZipFileResource $resource
-     * @throws InvalidArgumentException
-     */
-    public function __construct($data, ZipFileResource $resource = null)
+    public function __construct(string $data, private ?ZipFileResource $resource = null)
     {
-        if ($data instanceof SimpleXMLElement) {
-            $this->xml = $data;
-        } else if (is_string($data)) {
-            $this->xml = new SimpleXMLElement($data);
-        } else {
-            throw new InvalidArgumentException(sprintf('Invalid data type for OpfResource'));
-        }
-
-        $this->resource = $resource;
-
-        $this->namespaces = $this->xml->getNamespaces(true);
+        $this->reader = XmlReader::fromString($data);
     }
 
-    /**
-     * Processes the XML data and puts the data into a Package object
-     *
-     * @param Package $package
-     *
-     * @return Package
-     */
-    public function bind(Package $package = null)
+    public function bind(Package $package = null): Package
     {
         $package = $package ?: new Package();
-        $xml = $this->xml;
 
-        // Epub version:
-        $package->version = (string) $xml['version'];
+        // The key to simplicity: remove all namespaces!
+        $this->reader->removeNamespaces();
 
-        $this->processMetadataElement($xml->metadata, $package->metadata);
-        $this->processManifestElement($xml->manifest, $package->manifest);
-        $this->processSpineElement($xml->spine, $package->spine, $package->manifest, $package->navigation);
+        // Find the root <package> element. sole() will throw an exception if not found.
+        $packageElement = $this->reader->element('package')->sole();
 
-        if ($xml->guide) {
-            $this->processGuideElement($xml->guide, $package->guide);
+        if (!$packageElement) {
+            throw new InvalidArgumentException('Could not find the root <package> element in the OPF file.');
         }
+
+        $package->version = $packageElement->getAttribute('version');
+
+        // Process each section
+        $this->processMetadata($package->metadata);
+        $this->processManifest($package->manifest);
+        $this->processSpine($package->spine, $package->manifest, $package->navigation);
+        $this->processGuide($package->guide);
 
         return $package;
     }
 
-    private function processMetadataElement(SimpleXMLElement $xml, Metadata $metadata)
+    private function processMetadata(Metadata $metadata): void
     {
-        foreach ($xml->children(NamespaceRegistry::NAMESPACE_DC) as $child) {
-            $item = new MetadataItem();
+        // Get the entire metadata block as an array of values.
+        $metadataArray = $this->reader->value('package.metadata')->sole();
 
-            $item->name = $child->getName();
-            $item->value = trim((string) $child);
-            $item->attributes = $this->getXmlAttributes($child);
+        if (!$metadataArray) {
+            return;
+        }
 
-            $metadata->add($item);
+        foreach ($metadataArray as $name => $valueOrValues) {
+            // Handle multiple tags with the same name, e.g., <meta> or <dc:date>
+            $values = is_array($valueOrValues) && !isset($valueOrValues['content']) ? $valueOrValues : [$valueOrValues];
+
+            foreach ($values as $value) {
+                $item = new MetadataItem();
+                $item->name = $name;
+
+                if (is_array($value)) {
+                    $item->value = $value['content'] ?? null;
+                    $item->attributes = $value['attributes'] ?? [];
+                } else {
+                    $item->value = (string) $value;
+                }
+
+                $metadata->add($item);
+            }
         }
     }
 
-    private function processManifestElement(SimpleXMLElement $xml, Manifest $manifest)
+    private function processManifest(Manifest $manifest): void
     {
-        $children = $this->getNamespacedChildren($xml, NamespaceRegistry::NAMESPACE_OPF);
-
-        foreach ($children->item as $child) {
-            $attributes = $child->attributes();
+        // Use a memory-efficient lazy iterator for all <item> elements.
+        foreach ($this->reader->element('package.manifest.item')->lazy() as $itemElement) {
             $item = new ManifestItem();
+            $attributes = $itemElement->getAttributes();
 
-            $item->id       = (string) $attributes['id'];
-            $item->href     = (string) $attributes['href'];
-            $item->type     = (string) $attributes['media-type'];
-            $item->fallback = (string) $attributes['fallback'];
-            $item->setProperties($attributes['properties']);
+            $item->id       = $attributes['id'] ?? null;
+            $item->href     = $attributes['href'] ?? null;
+            $item->type     = $attributes['media-type'] ?? null;
+            $item->fallback = $attributes['fallback'] ?? null;
+            $item->setProperties($attributes['properties'] ?? null);
 
             $this->addContentGetter($item);
-
             $manifest->add($item);
         }
     }
 
-    private function processSpineElement(SimpleXMLElement $xml, Spine $spine, Manifest $manifest, Navigation $navigation)
+    private function processSpine(Spine $spine, Manifest $manifest, Navigation $navigation): void
     {
+        // Use a lazy iterator for all <itemref> elements.
         $position = 1;
-        $children = $this->getNamespacedChildren($xml, NamespaceRegistry::NAMESPACE_OPF);
-
-        foreach ($children->itemref as $child) {
-            $id = (string) $child->attributes()->idref;
+        foreach ($this->reader->element('package.spine.itemref')->lazy() as $itemRefElement) {
+            $id = $itemRefElement->getAttribute('idref');
             $manifestItem = $manifest->get($id);
-            if (!$linear = $child['linear']) {
-                $linear = 'yes';
-            }
+
+            if (!$manifestItem) continue;
 
             $item = new SpineItem();
-
-
             $item->id     = $id;
             $item->type   = $manifestItem->type;
             $item->href   = $manifestItem->href;
-            $item->order  = $position;
-            $item->linear = $linear;
+            $item->order  = $position++;
+            $item->linear = $itemRefElement->getAttribute('linear', 'yes');
 
             $this->addContentGetter($item);
-
             $spine->add($item);
-
-            $position++;
         }
 
-        $ncxId = ($xml['toc']) ? (string) $xml['toc'] : 'ncx';
+        // Get the 'toc' attribute from the spine element itself
+        $spineElement = $this->reader->element('package.spine')->sole();
+        $ncxId = $spineElement->getAttribute('toc', 'ncx');
 
         if ($manifest->has($ncxId)) {
             $navigation->src = $manifest->get($ncxId);
         }
     }
 
-    private function processGuideElement(SimpleXMLElement $xml, Guide $guide)
+    private function processGuide(Guide $guide): void
     {
-        $children = $this->getNamespacedChildren($xml, NamespaceRegistry::NAMESPACE_OPF);
-
-        foreach ($xml->reference as $child) {
+        // Use a lazy iterator for all <reference> elements.
+        foreach ($this->reader->element('package.guide.reference')->lazy() as $referenceElement) {
             $item = new GuideItem();
+            $attributes = $referenceElement->getAttributes();
 
-            $item->title = (string) $child['title'];
-            $item->type  = (string) $child['type'];
-            $item->href  = (string) $child['href'];
+            $item->title = $attributes['title'] ?? null;
+            $item->type  = $attributes['type'] ?? null;
+            $item->href  = $attributes['href'] ?? null;
 
             $this->addContentGetter($item);
-
             $guide->add($item);
         }
     }
 
-    /**
-     * Builds an array from XML attributes
-     *
-     * For instance:
-     *
-     *   <tag
-     *       xmlns:opf="http://www.idpf.org/2007/opf"
-     *       opf:file-as="Some Guy"
-     *       id="name"/>
-     *
-     * Will become:
-     *
-     *   array('opf:file-as' => 'Some Guy', 'id' => 'name')
-     *
-     * **NOTE**: Namespaced attributes will have the namespace prefix
-     *           prepended to the attribute name
-     *
-     * @param \SimpleXMLElement $xml The XML tag to grab attributes from
-     *
-     * @return array
-     */
-    private function getXmlAttributes($xml)
-    {
-        $attributes = array();
-        foreach ($this->namespaces as $prefix => $namespace) {
-            foreach ($xml->attributes($namespace) as $attr => $value) {
-                if ($prefix !== "") {
-                    $attr = "{$prefix}:{$attr}";
-                }
-
-                $attributes[$attr] = $value;
-            }
-        }
-
-        return $attributes;
-    }
-
-    private function addContentGetter($item)
+    private function addContentGetter($item): void
     {
         if (null !== $this->resource) {
             $resource = $this->resource;
-
-            $item->setContent(function () use ($item, $resource) {
-                return $resource->get($item->href);
-            });
+            $item->setContent(fn() => $resource->get($item->href));
         }
     }
-
-    private function getNamespacedChildren(SimpleXMLElement $xml, $namespace)
-    {
-        $xmlNamespaces = $xml->getNamespaces(true);
-
-        return in_array($namespace, $xmlNamespaces) ?
-            $xml->children($xmlNamespaces[array_search($namespace, $xmlNamespaces)]) :
-            $xml->children();
-    }
-
 }

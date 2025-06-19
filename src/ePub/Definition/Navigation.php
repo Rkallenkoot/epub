@@ -21,6 +21,6 @@ class Navigation
     public function __construct()
     {
         $this->src = new ManifestItem();
-        $this->chapters = array();
+        $this->chapters = [];
     }
 }

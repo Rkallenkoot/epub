@@ -42,8 +42,7 @@ class ZipFileLoader
             }
         }
 
-        $opfFile = $opfFile ??
-            $package->rootfiles->rootfile['full-path'];
+        $opfFile ??= $package->rootfiles->rootfile['full-path'];
 
         $data = $resource->get($opfFile);
 

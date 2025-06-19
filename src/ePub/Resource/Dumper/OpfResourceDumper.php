@@ -25,14 +25,11 @@ use ePub\NamespaceRegistry;
 
 class OpfResourceDumper
 {
-	private $package;
+	public function __construct(private Package $package)
+    {
+    }
 
-	public function __construct(Package $package)
-	{
-		$this->package = $package;
-	}
-
-	public function dump(array $options = array())
+	public function dump(array $options = [])
 	{
 		$dom = new \DOMDocument('1.0');
 		$dom->formatOutput = true;

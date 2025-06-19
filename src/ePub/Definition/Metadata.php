@@ -22,14 +22,14 @@ class Metadata extends Collection
         if (!($item instanceof MetadataItem)) {
             throw new InvalidArgumentException(sprintf(
                 'Expected instance of ePub\Definition\MetadataItem, got %s',
-                get_class($item)
+                $item::class
             ));
         }
 
         $id = $item->getIdentifier();
 
         if (!isset($this->items[$id])) {
-            $this->items[$id] = array();
+            $this->items[$id] = [];
         }
 
         $this->items[$id][] = $item;

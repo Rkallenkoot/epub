@@ -11,11 +11,11 @@
 
 namespace ePub\Tests\Writer;
 
-use ePub\Tests\BaseTest;
+use ePub\Tests\BaseTestCase;
 use ePub\Reader;
 use ePub\Resource\Dumper\OpfResourceDumper;
 
-class WriterTest extends BaseTest
+class WriterTest extends BaseTestCase
 {
     public function testLoadingEpubFile()
     {
