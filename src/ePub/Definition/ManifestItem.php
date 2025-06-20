@@ -13,18 +13,14 @@ namespace ePub\Definition;
 
 class ManifestItem implements ItemInterface
 {
-    private ?string $id;
-    private ?string $href;
-    private ?string $type;
-    private array $properties = [];
     private $content;
 
-    public function __construct(?string $id, ?string $href, ?string $type)
-    {
-        $this->id = $id;
-        $this->href = $href;
-        $this->type = $type;
-    }
+    public function __construct(
+        public ?string $id = null,
+        public ?string $href = null,
+        public ?string $type = null,
+        public ?array $properties = [],
+    ) {}
 
     public function getIdentifier(): ?string
     {

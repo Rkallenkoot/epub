@@ -20,4 +20,12 @@ class NamespaceRegistry
     const PREFIX_DC = "dc";
 
     const PREFIX_OPF = "opf";
+
+    public static function getNamespaces()
+    {
+        return [
+            self::PREFIX_DC => self::NAMESPACE_DC,
+            self::PREFIX_OPF => self::NAMESPACE_OPF,
+        ];
+    }
 }

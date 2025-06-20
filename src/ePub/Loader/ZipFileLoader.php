@@ -37,7 +37,7 @@ class ZipFileLoader
             $ns = $package->getNamespaces();
             foreach ($ns as $key => $value) {
                 $package->registerXPathNamespace($key, $value);
-                $items = $package->xpath('//'. $key .':rootfile/@full-path');
+                $items = $package->xpath('//' . $key . ':rootfile/@full-path');
                 $opfFile = (string) $items[0]['full-path'];
             }
         }
@@ -55,12 +55,6 @@ class ZipFileLoader
         $package = $opfResource->bind();
 
         $package->opfDirectory = dirname($opfFile);
-
-        if ($package->navigation->src->href) {
-            $ncx = $resource->get($package->navigation->src->href);
-            $ncxResource = new NcxResource($ncx);
-            $package = $ncxResource->bind($package);
-        }
 
         return $package;
     }

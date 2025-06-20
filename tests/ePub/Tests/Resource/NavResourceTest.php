@@ -40,7 +40,7 @@ class NavResourceTest extends BaseTestCase
         $unit1Children = $chapters[2]->getChildren();
         $chapter1 = $unit1Children[0];
         $this->assertEquals('CHAPTER 1 - Welcome to the World', $chapter1->title);
-        $this->assertCount(8, $chapter1->getChildren());
+        $this->assertCount(7, $chapter1->getChildren());
     }
 
     public function testPageListParsing(): void

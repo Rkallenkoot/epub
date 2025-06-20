@@ -17,17 +17,17 @@ class Package
 
     public $opfDirectory;
 
-    private Metadata $metadata;
+    public Metadata $metadata;
 
-    private Manifest $manifest;
+    public Manifest $manifest;
 
-    private Spine $spine;
+    public Spine $spine;
 
-    private Guide $guide;
+    public Guide $guide;
 
-    private Navigation $navigation;
+    public Navigation $navigation;
 
-    private ?PageList $pageList = null;
+    public ?PageList $pageList = null;
 
     public function __construct()
     {

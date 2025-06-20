@@ -62,4 +62,13 @@ class ReaderTest extends BaseTestCase
 
         $this->assertTrue($epub instanceof \ePub\Definition\Package);
     }
+
+    public function testToc()
+    {
+        $epub = $this->getFixtureEpub('WCAG.epub');
+
+        $this->assertTrue($epub instanceof \ePub\Definition\Package);
+        $this->assertNotNull($epub->getNavigation()->getChapters());
+        $this->assertNotNull($epub->getPageList());
+    }
 }

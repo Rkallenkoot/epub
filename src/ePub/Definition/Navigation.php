@@ -4,12 +4,14 @@ namespace ePub\Definition;
 
 class Navigation implements \IteratorAggregate, \Countable
 {
+    public $src;
+
     /**
      * Array of Chapters
      *
      * @var Chapter[]
      */
-    private array $chapters = [];
+    public array $chapters = [];
 
     public function addChapter(Chapter $chapter): void
     {
