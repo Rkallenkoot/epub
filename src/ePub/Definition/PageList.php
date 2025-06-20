@@ -2,6 +2,4 @@
 
 namespace ePub\Definition;
 
-class PageList extends Collection
-{
-}
+class PageList {}

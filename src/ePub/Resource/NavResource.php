@@ -37,6 +37,7 @@ class NavResource
     private function processToc(Package $package): void
     {
         $tocNav = $this->xpath->query('//xhtml:nav[@epub:type="toc"]')->item(0);
+        dd($tocNav);
         if (!$tocNav) {
             return;
         }
@@ -115,7 +116,7 @@ class NavResource
 
         foreach ($manifest->all() as $manifestItem) {
             if ($manifestItem->getHref() === $path) {
-                $item->setContent(fn () => $manifestItem->getContent());
+                $item->setContent(fn() => $manifestItem->getContent());
                 break;
             }
         }

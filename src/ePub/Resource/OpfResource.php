@@ -154,6 +154,7 @@ class OpfResource
             if ($content) {
                 $navResource = new NavResource($content, $this->resource);
                 $navResource->bind($package);
+                dd($navResource, $package->getNavigation());
                 return;
             }
         }
