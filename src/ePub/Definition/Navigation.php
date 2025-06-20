@@ -1,26 +1,36 @@
 <?php
 
-
 namespace ePub\Definition;
 
-use ePub\Definition\Chapter;
-
-
-class Navigation
+class Navigation implements \IteratorAggregate, \Countable
 {
-    public $src;
-
     /**
      * Array of Chapters
      *
-     * @var array
+     * @var Chapter[]
      */
-    public $chapters;
+    private array $chapters = [];
 
-
-    public function __construct()
+    public function addChapter(Chapter $chapter): void
     {
-        $this->src = new ManifestItem();
-        $this->chapters = [];
+        $this->chapters[] = $chapter;
+    }
+
+    /**
+     * @return Chapter[]
+     */
+    public function getChapters(): array
+    {
+        return $this->chapters;
+    }
+
+    public function getIterator(): \ArrayIterator
+    {
+        return new \ArrayIterator($this->chapters);
+    }
+
+    public function count(): int
+    {
+        return count($this->chapters);
     }
 }

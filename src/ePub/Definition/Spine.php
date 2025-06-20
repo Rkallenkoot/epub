@@ -11,9 +11,17 @@
 
 namespace ePub\Definition;
 
-use ePub\Definition\Metadata;
-use ePub\Definition\ManifestItem;
-
 class Spine extends Collection
 {
+    private string $pageProgressionDirection = 'ltr';
+
+    public function setPageProgressionDirection(string $direction): void
+    {
+        $this->pageProgressionDirection = $direction;
+    }
+
+    public function getPageProgressionDirection(): string
+    {
+        return $this->pageProgressionDirection;
+    }
 }
