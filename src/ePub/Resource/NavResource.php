@@ -17,7 +17,7 @@ class NavResource
     public function __construct(string $data, private ?ZipFileResource $resource = null)
     {
         $this->dom = new \DOMDocument();
-        @$this->dom->loadHTML($data, LIBXML_NOWARNING | LIBXML_NOERROR);
+        @$this->dom->loadXML($data, LIBXML_NOWARNING | LIBXML_NOERROR);
         $this->xpath = new \DOMXPath($this->dom);
 
         foreach (NamespaceRegistry::getNamespaces() as $prefix => $uri) {
@@ -37,7 +37,6 @@ class NavResource
     private function processToc(Package $package): void
     {
         $tocNav = $this->xpath->query('//xhtml:nav[@epub:type="toc"]')->item(0);
-        dd($tocNav);
         if (!$tocNav) {
             return;
         }
