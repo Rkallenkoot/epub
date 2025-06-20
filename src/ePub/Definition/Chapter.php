@@ -7,7 +7,7 @@ class Chapter
     public string $title;
     public int $position;
     public ?string $src;
-    private array $children = [];
+    public array $children = [];
     private $content;
 
     public function __construct(string $title, int $pos, ?string $src = null)
