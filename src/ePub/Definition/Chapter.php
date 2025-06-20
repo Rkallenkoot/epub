@@ -12,7 +12,7 @@ class Chapter
 
     public function __construct(string $title, int $pos, ?string $src = null)
     {
-        $this->title = str_replace(["\n", "\r"], ' ', $title);
+        $this->title = preg_replace('/\s+/', ' ', trim($title));
         $this->position = $pos;
         $this->src = $src;
     }
