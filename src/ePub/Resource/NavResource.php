@@ -99,7 +99,14 @@ class NavResource
             $href = $link->attributes->getNamedItem('href')?->nodeValue;
             $pageNumber = trim($link->nodeValue);
 
-            $pageListItem = new PageListItem($pageNumber, $href, $pageNumber);
+            // Extract the fragment (page identifier) from the href
+            $fragment = null;
+            if ($href && str_contains($href, '#')) {
+                $parts = explode('#', $href);
+                $fragment = $parts[1] ?? null;
+            }
+
+            $pageListItem = new PageListItem($fragment, $href, $pageNumber);
             $pageList->add($pageListItem);
         }
 

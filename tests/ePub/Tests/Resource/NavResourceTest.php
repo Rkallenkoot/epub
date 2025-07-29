@@ -52,12 +52,12 @@ class NavResourceTest extends BaseTestCase
         $pages = $pageList->all();
 
         $firstPage = $pages[0];
-        $this->assertEquals('iv', $firstPage->getIdentifier());
+        $this->assertEquals('piv', $firstPage->getIdentifier());
         $this->assertEquals('iv', $firstPage->getText());
         $this->assertEquals('WCAG-ch1-1.xhtml#piv', $firstPage->getSrc());
 
         $lastPage = $pages[20];
-        $this->assertEquals('31', $lastPage->getIdentifier());
+        $this->assertEquals('p31', $lastPage->getIdentifier());
         $this->assertEquals('31', $lastPage->getText());
         $this->assertEquals('WCAG-ch1-2.xhtml#p31', $lastPage->getSrc());
     }
