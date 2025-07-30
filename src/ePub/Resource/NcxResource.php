@@ -16,10 +16,12 @@ class NcxResource
      * Constructor
      *
      * @param string $data The raw XML content of the NCX file.
-     * @param ZipFileResource|null $resource The Zip resource for lazy-loading content.
+     * @param ResourceInterface|null $resource The resource for lazy-loading content.
      */
-    public function __construct(string $data, private ?ZipFileResource $resource = null)
-    {
+    public function __construct(
+        string $data,
+        private ?ResourceInterface $resource = null,
+    ) {
         $this->reader = XmlReader::fromString($data);
     }
 
@@ -38,9 +40,9 @@ class NcxResource
         $this->reader->removeNamespaces();
 
         // Find the root <navMap> element.
-        $navMapElement = $this->reader->element('ncx.navMap')->sole();
+        $navMapElement = $this->reader->element("ncx.navMap")->sole();
 
-        if (! $navMapElement) {
+        if (!$navMapElement) {
             // An NCX file without a navMap is not useful for navigation.
             return $package;
         }
@@ -60,7 +62,10 @@ class NcxResource
      */
     private function processNavPoints(array &$chapters): void
     {
-        foreach ($this->reader->element('ncx.navMap.navPoint')->lazy() as $navPoint) {
+        foreach (
+            $this->reader->element("ncx.navMap.navPoint")->lazy()
+            as $navPoint
+        ) {
             $chapters[] = $this->consumeNavPoint($navPoint);
         }
     }
@@ -75,19 +80,23 @@ class NcxResource
     private function consumeNavPoint(Element $navPointElement): ?Chapter
     {
         $navPointContent = $navPointElement->getContent();
-        $navLabel = $navPointContent['navLabel'] ?? null;
+        $navLabel = $navPointContent["navLabel"] ?? null;
 
-        $title = $navLabel?->getContent()['text']->getContent() ?? '';
-        $content = $navPointContent['content'] ?? null;
-        $order = (int) $navPointElement->getAttribute('playOrder');
+        $title = $navLabel?->getContent()["text"]->getContent() ?? "";
+        $content = $navPointContent["content"] ?? null;
+        $order = (int) $navPointElement->getAttribute("playOrder");
 
-        $chapter = new Chapter($title, $order, $content?->getAttributes()['src']);
+        $chapter = new Chapter(
+            $title,
+            $order,
+            $content?->getAttributes()["src"],
+        );
 
         $this->addContentGetter($chapter);
 
         // Check for nested <navPoint> children within the content array.
-        if (isset($navPointContent['navPoint'])) {
-            $childrenData = $navPointContent['navPoint'];
+        if (isset($navPointContent["navPoint"])) {
+            $childrenData = $navPointContent["navPoint"];
 
             foreach ($childrenData->getContent() as $childElement) {
                 $chapter->addChild($this->consumeNavPoint($childElement));
@@ -109,7 +118,11 @@ class NcxResource
     {
         // To make this fully functional, the Chapter class should have a public `href`
         // property (populated from its `src`) and a `setContent` method.
-        if (null !== $this->resource && property_exists($item, 'href') && method_exists($item, 'setContent')) {
+        if (
+            null !== $this->resource &&
+            property_exists($item, "href") &&
+            method_exists($item, "setContent")
+        ) {
             $resource = $this->resource;
             $item->setContent(fn() => $resource->get($item->href));
         }

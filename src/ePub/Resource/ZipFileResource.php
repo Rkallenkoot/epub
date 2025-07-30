@@ -13,7 +13,7 @@ namespace ePub\Resource;
 
 use ZipArchive;
 
-class ZipFileResource
+class ZipFileResource implements ResourceInterface
 {
     private $zipFile;
 
@@ -26,33 +26,33 @@ class ZipFileResource
         $this->zipFile->open($file);
     }
 
-    public function setDirectory($dir)
+    public function setDirectory(string $dir): void
     {
         $this->cwd = $dir;
     }
 
-    public function get($name)
+    public function get(string $path): string|false
     {
         if (null !== $this->cwd) {
-            $name = $this->cwd . '/' . $name;
+            $path = $this->cwd . "/" . $path;
         }
 
-        return $this->zipFile->getFromName($name);
+        return $this->zipFile->getFromName($path);
     }
 
-    public function getXML($name)
+    public function getXML(string $path): \SimpleXMLElement|false
     {
-        return simplexml_load_string($this->get($name));
+        return simplexml_load_string($this->get($path));
     }
 
     public function all()
     {
         $result = [];
 
-        for ($i = 0; $i < $this->zipFile->numFiles; $i++){
+        for ($i = 0; $i < $this->zipFile->numFiles; $i++) {
             $item = $this->zipFile->statIndex($i);
 
-            $result[] = $item['name'];
+            $result[] = $item["name"];
         }
 
         return $result;

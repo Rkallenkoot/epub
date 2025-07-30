@@ -14,8 +14,10 @@ class NavResource
     private \DOMDocument $dom;
     private \DOMXPath $xpath;
 
-    public function __construct(string $data, private ?ZipFileResource $resource = null)
-    {
+    public function __construct(
+        string $data,
+        private ?ResourceInterface $resource = null,
+    ) {
         $this->dom = new \DOMDocument();
         @$this->dom->loadXML($data, LIBXML_NOWARNING | LIBXML_NOERROR);
         $this->xpath = new \DOMXPath($this->dom);
@@ -47,20 +49,25 @@ class NavResource
         }
     }
 
-    private function processNavList(\DOMElement $element, Manifest $manifest, int &$order = 1): array
-    {
+    private function processNavList(
+        \DOMElement $element,
+        Manifest $manifest,
+        int &$order = 1,
+    ): array {
         $chapters = [];
         /** @var \DOMNodeList $listItems */
-        $listItems = $this->xpath->query('./xhtml:ol/xhtml:li', $element);
+        $listItems = $this->xpath->query("./xhtml:ol/xhtml:li", $element);
 
         foreach ($listItems as $listItem) {
             /** @var \DOMElement|null $link */
-            $link = $this->xpath->query('./xhtml:a|./xhtml:span', $listItem)->item(0);
+            $link = $this->xpath
+                ->query("./xhtml:a|./xhtml:span", $listItem)
+                ->item(0);
             if (!$link) {
                 continue;
             }
 
-            $href = $link->attributes->getNamedItem('href')?->nodeValue;
+            $href = $link->attributes->getNamedItem("href")?->nodeValue;
             $title = trim($link->nodeValue);
             $chapter = new Chapter($title, $order++, $href);
 
@@ -68,7 +75,11 @@ class NavResource
                 $this->addContentGetter($chapter, $href, $manifest);
             }
 
-            $childChapters = $this->processNavList($listItem, $manifest, $order);
+            $childChapters = $this->processNavList(
+                $listItem,
+                $manifest,
+                $order,
+            );
             foreach ($childChapters as $childChapter) {
                 $chapter->addChild($childChapter);
             }
@@ -81,35 +92,37 @@ class NavResource
 
     private function processPageList(Package $package): void
     {
-        $pageListNav = $this->xpath->query('//xhtml:nav[@epub:type="page-list"]')->item(0);
+        $pageListNav = $this->xpath
+            ->query('//xhtml:nav[@epub:type="page-list"]')
+            ->item(0);
         if (!$pageListNav) {
             return;
         }
 
         $pageList = new PageList();
-        $listItems = $this->xpath->query('.//xhtml:li', $pageListNav);
+        $listItems = $this->xpath->query(".//xhtml:li", $pageListNav);
 
         foreach ($listItems as $listItem) {
             /** @var \DOMElement|null $link */
-            $link = $this->xpath->query('./xhtml:a', $listItem)->item(0);
+            $link = $this->xpath->query("./xhtml:a", $listItem)->item(0);
             if (!$link) {
                 continue;
             }
 
-            $href = $link->attributes->getNamedItem('href')?->nodeValue;
+            $href = $link->attributes->getNamedItem("href")?->nodeValue;
             $pageNumber = trim($link->nodeValue);
 
             // Extract the fragment (page identifier) from the href
             $fragment = null;
-            if ($href && str_contains($href, '#')) {
-                $parts = explode('#', $href);
+            if ($href && str_contains($href, "#")) {
+                $parts = explode("#", $href);
                 $fragment = $parts[1] ?? null;
             }
 
             $pageListItem = new PageListItem(
-                $fragment ?? $href, 
-                $href, 
-                $pageNumber
+                $fragment ?? $href,
+                $href,
+                $pageNumber,
             );
             $pageList->add($pageListItem);
         }
@@ -119,10 +132,13 @@ class NavResource
         }
     }
 
-    private function addContentGetter(Chapter $item, string $href, Manifest $manifest): void
-    {
+    private function addContentGetter(
+        Chapter $item,
+        string $href,
+        Manifest $manifest,
+    ): void {
         $parts = parse_url($href);
-        $path = $parts['path'] ?? '';
+        $path = $parts["path"] ?? "";
 
         foreach ($manifest->all() as $manifestItem) {
             if ($manifestItem->getHref() === $path) {
