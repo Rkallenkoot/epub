@@ -61,4 +61,28 @@ class NavResourceTest extends BaseTestCase
         $this->assertEquals('31', $lastPage->getText());
         $this->assertEquals('WCAG-ch1-2.xhtml#p31', $lastPage->getSrc());
     }
+
+    public function testPageListParsingWithoutFragment()
+    {
+        $navContent = $this->getFixture('epub3/toc_without_fragment.xhtml');
+        $package = new Package();
+        $navResource = new NavResource($navContent);
+        $navResource->bind($package);
+
+        $pageList = $package->getPageList();
+        $this->assertNotNull($pageList);
+        $this->assertCount(21, $pageList->all());
+
+        $pages = $pageList->all();
+
+        $firstPage = $pages[0];
+        $this->assertEquals('WCAG-ch1-1.xhtml', $firstPage->getIdentifier());
+        $this->assertEquals('iv', $firstPage->getText());
+        $this->assertEquals('WCAG-ch1-1.xhtml', $firstPage->getSrc());
+
+        $lastPage = $pages[20];
+        $this->assertEquals('WCAG-ch1-2.xhtml', $lastPage->getIdentifier());
+        $this->assertEquals('31', $lastPage->getText());
+        $this->assertEquals('WCAG-ch1-2.xhtml', $lastPage->getSrc());
+    }
 }

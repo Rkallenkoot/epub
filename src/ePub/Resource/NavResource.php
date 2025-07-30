@@ -106,7 +106,11 @@ class NavResource
                 $fragment = $parts[1] ?? null;
             }
 
-            $pageListItem = new PageListItem($fragment, $href, $pageNumber);
+            $pageListItem = new PageListItem(
+                $fragment ?? $href, 
+                $href, 
+                $pageNumber
+            );
             $pageList->add($pageListItem);
         }
 
