@@ -13,10 +13,6 @@ namespace ePub\Loader;
 
 use ePub\Resource\ZipFileResource;
 use ePub\Resource\OpfResource;
-use ePub\Resource\NcxResource;
-use ePub\Definition\Manifest;
-use ePub\Definition\ManifestItem;
-use ePub\Definition\Metadata;
 
 class ZipFileLoader
 {
@@ -31,24 +27,23 @@ class ZipFileLoader
     {
         $resource = new ZipFileResource($file);
 
-        $package = $resource->getXML('META-INF/container.xml');
+        $package = $resource->getXML("META-INF/container.xml");
 
         if (!isset($package->rootfiles)) {
             $ns = $package->getNamespaces();
             foreach ($ns as $key => $value) {
                 $package->registerXPathNamespace($key, $value);
-                $items = $package->xpath('//'. $key .':rootfile/@full-path');
-                $opfFile = (string) $items[0]['full-path'];
+                $items = $package->xpath("//" . $key . ":rootfile/@full-path");
+                $opfFile = (string) $items[0]["full-path"];
             }
         }
 
-        $opfFile = $opfFile ??
-            $package->rootfiles->rootfile['full-path'];
+        $opfFile ??= $package->rootfiles->rootfile["full-path"];
 
         $data = $resource->get($opfFile);
 
         // all files referenced in the OPF are relative to it's directory
-        if ('.' !== $dir = dirname($opfFile)) {
+        if ("." !== ($dir = dirname($opfFile))) {
             $resource->setDirectory($dir);
         }
 
@@ -56,12 +51,6 @@ class ZipFileLoader
         $package = $opfResource->bind();
 
         $package->opfDirectory = dirname($opfFile);
-
-        if ($package->navigation->src->href) {
-            $ncx = $resource->get($package->navigation->src->href);
-            $ncxResource = new NcxResource($ncx);
-            $package = $ncxResource->bind($package);
-        }
 
         return $package;
     }

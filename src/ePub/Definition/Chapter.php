@@ -1,27 +1,44 @@
 <?php
 
-
 namespace ePub\Definition;
-
 
 class Chapter
 {
-    public $title;
-    public $src;
-    public $position;
-    public $children;
+    public string $title;
+    public int $position;
+    public ?string $src;
+    public array $children = [];
+    private $content;
 
-    public function __construct($title, $pos, $src = null)
+    public function __construct(string $title, int $pos, ?string $src = null)
     {
-        $this->title = str_replace(array("\n", "\r"), ' ', $title);
+        $this->title = preg_replace('/\s+/', ' ', trim($title));
+        $this->position = $pos;
         $this->src = $src;
-        $this->position = (int) $pos;
-        $this->children = array();
     }
 
-
-    public function addChild(Chapter $child)
+    public function addChild(Chapter $child): void
     {
         $this->children[] = $child;
+    }
+
+    public function getChildren(): array
+    {
+        return $this->children;
+    }
+
+    public function setContent($content): void
+    {
+        $this->content = $content;
+    }
+
+    public function getContent()
+    {
+        if (is_callable($this->content)) {
+            $func = $this->content;
+            $this->content = $func();
+        }
+
+        return $this->content;
     }
 }

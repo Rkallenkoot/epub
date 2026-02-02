@@ -17,7 +17,7 @@ class MetadataItem implements ItemInterface
 
     public $value;
 
-    public $attributes = array();
+    public $attributes = [];
 
     public function getIdentifier()
     {

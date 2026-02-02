@@ -11,10 +11,10 @@
 
 namespace ePub\Tests;
 
-use ePub\Tests\BaseTest;
+use ePub\Tests\BaseTestCase;
 use ePub\Reader;
 
-class ReaderTest extends BaseTest
+class ReaderTest extends BaseTestCase
 {
     public function testBasicInstantiation()
     {
@@ -24,7 +24,7 @@ class ReaderTest extends BaseTest
     public function testLoadingEpubFile()
     {
         $epub = $this->getFixtureEpub('the_velveteen_rabbit.epub');
-        
+
         $this->assertTrue($epub instanceof \ePub\Definition\Package);
     }
 
@@ -37,21 +37,21 @@ class ReaderTest extends BaseTest
         $expected   = $this->getFixture('the-velveteen-rabbit/' . $dedication->href);
         $this->assertEquals($expected, $dedication->getContent());
     }
-    
+
     public function testReadingEpubVersion()
     {
         $epub = $this->getFixtureEpub('epub3_nested_nav.epub');
         $this->assertEquals('3.0', $epub->version);
-        
+
         $epub = $this->getFixtureEpub('the_velveteen_rabbit.epub');
         $this->assertEquals('2.0', $epub->version);
     }
-    
+
     public function testReadingOpfDirectory()
     {
         $epub = $this->getFixtureEpub('the_velveteen_rabbit.epub');
         $this->assertEquals('.', $epub->opfDirectory);
-        
+
         $epub = $this->getFixtureEpub('epub3_nested_nav.epub');
         $this->assertEquals('EPUB', $epub->opfDirectory);
     }
@@ -61,5 +61,14 @@ class ReaderTest extends BaseTest
         $epub = $this->getFixtureEpub('pg19132.epub');
 
         $this->assertTrue($epub instanceof \ePub\Definition\Package);
+    }
+
+    public function testToc()
+    {
+        $epub = $this->getFixtureEpub('WCAG.epub');
+
+        $this->assertTrue($epub instanceof \ePub\Definition\Package);
+        $this->assertNotNull($epub->getNavigation()->getChapters());
+        $this->assertNotNull($epub->getPageList());
     }
 }

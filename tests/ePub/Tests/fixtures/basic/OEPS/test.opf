@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opf:package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dcms="http://www.dcms.com/" xmlns:opf="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" version="3.0" unique-identifier="bookid">
+   <opf:metadata>
+      <dc:title>Women Shall Not Rule</dc:title>
+      <dc:creator>Keith McMahon</dc:creator>
+      <dc:language>en-us</dc:language>
+      <dc:subject>undefined</dc:subject>
+      <dc:description>undefined</dc:description>
+      <dc:publisher>undefined</dc:publisher>
+      <dc:date>2012</dc:date>
+      <opf:meta property="dcterms:modified">
+			2012-04-12T12:00:00Z
+		</opf:meta>
+      <dc:identifier id="bookid">
+			urn:isbn:undefined</dc:identifier>
+      <dc:rights>undefined</dc:rights>
+      <dc:coverage>undefined</dc:coverage>
+      <opf:meta name="cover" content="cover-image"/>
+   </opf:metadata>
+   <opf:manifest>
+      <opf:item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+      <opf:item id="nav" properties="nav" href="toc_nav.xhtml" media-type="application/xhtml+xml"/>
+      <opf:item id="title.html" href="1-A01-fm_frontmatter.html" media-type="application/xhtml+xml"/>
+      <opf:item id="cover" href="1-A01-fm_cover.html" media-type="application/xhtml+xml"/>
+      <opf:item id="css-file" href="css/xml2epub.css" media-type="text/css"/>
+      <opf:item id="d42e8" href="3-B02-listfigs.html" media-type="application/xhtml+xml"/>
+      <opf:item id="d42e9" href="4-B03-ackns.html" media-type="application/xhtml+xml"/>
+      <opf:item id="d42e10" href="5-B04-prologue.html" media-type="application/xhtml+xml"/>
+      <opf:item id="d42e11" href="6-C01a-partI.html" media-type="application/xhtml+xml"/>
+   </opf:manifest>
+   <opf:spine toc="ncx">
+      <opf:itemref idref="cover"/>
+      <opf:itemref idref="title.html"/>
+      <opf:itemref idref="d42e8"/>
+      <opf:itemref idref="d42e9"/>
+      <opf:itemref idref="d42e10"/>
+   </opf:spine>
+   <opf:guide>
+      <opf:reference type="cover" href="1-A01-fm_cover.html" title="Cover"/>
+   </opf:guide>
+</opf:package>
