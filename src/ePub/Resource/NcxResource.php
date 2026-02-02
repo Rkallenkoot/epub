@@ -1,95 +1,130 @@
 <?php
 
-
 namespace ePub\Resource;
 
-use SimpleXMLElement;
+use Saloon\XmlWrangler\XmlReader;
+use Saloon\XmlWrangler\Data\Element;
 use ePub\Definition\Package;
 use ePub\Definition\Chapter;
 use ePub\Exception\InvalidArgumentException;
 
-
 class NcxResource
 {
-
-    const NS_NCX = "http://www.daisy.org/z3986/2005/ncx/";
-
-    /**
-     * @var \SimpleXMLElement
-     */
-    private $xml;
-
-    /**
-     * Array of XML namespaces found in document
-     *
-     * @var array
-     */
-    private $namespaces;
+    private XmlReader $reader;
 
     /**
      * Constructor
      *
-     * @param \SimpleXMLElement|string $data
-     * @throws InvalidArgumentException
+     * @param string $data The raw XML content of the NCX file.
+     * @param ResourceInterface|null $resource The resource for lazy-loading content.
      */
-    public function __construct($data)
-    {
-        if ($data instanceof SimpleXMLElement) {
-            $this->xml = $data;
-        } else if (is_string($data)) {
-            $this->xml = new SimpleXMLElement($data);
-        } else {
-            throw new InvalidArgumentException(sprintf('Invalid data type for NcxResource'));
-        }
-
-        $this->namespaces = $this->xml->getNamespaces(true);
+    public function __construct(
+        string $data,
+        private ?ResourceInterface $resource = null,
+    ) {
+        $this->reader = XmlReader::fromString($data);
     }
 
-
     /**
-     * Processes the XML data and puts the data into a Package object
+     * Processes the NCX XML data and populates the navigation chapters in a Package object.
      *
-     * @param Package $package
-     *
+     * @param Package|null $package
      * @return Package
+     * @throws InvalidArgumentException
      */
-    public function bind(Package $package = null)
+    public function bind(Package $package = null): Package
     {
         $package = $package ?: new Package();
 
-        if (in_array(static::NS_NCX, $this->namespaces)) {
-            $navMap = $this->xml->children(
-                $this->namespaces[
-                  array_search(static::NS_NCX, $this->namespaces)
-                ],
-            )->navMap;
-        } else {
-            $navMap = $this->xml->navMap;
+        // The key to simplicity: remove all namespaces!
+        $this->reader->removeNamespaces();
+
+        // Find the root <navMap> element.
+        $navMapElement = $this->reader->element("ncx.navMap")->sole();
+
+        if (!$navMapElement) {
+            // An NCX file without a navMap is not useful for navigation.
+            return $package;
         }
 
-        $this->consumeNavMap($navMap, $package->navigation->chapters);
+        // Start the recursive processing of navigation points (chapters).
+        $this->processNavPoints($package->navigation->chapters);
 
         return $package;
     }
 
-
-    private function consumeNavMap($navMap, &$chapters)
+    /**
+     * Iterates over <navPoint> elements within a given parent element and adds them
+     * to the chapters array.
+     *
+     * @param XmlReader $parentElement The parent element containing navPoints (e.g., navMap or another navPoint).
+     * @param array $chapters The array to add the new Chapter objects to.
+     */
+    private function processNavPoints(array &$chapters): void
     {
-        foreach ($navMap->navPoint as $navPoint) {
+        foreach (
+            $this->reader->element("ncx.navMap.navPoint")->lazy()
+            as $navPoint
+        ) {
             $chapters[] = $this->consumeNavPoint($navPoint);
         }
     }
 
-
-    private function consumeNavPoint($navPoint)
+    /**
+     * Recursively consumes a <navPoint> element, creates a Chapter object,
+     * and processes any nested navPoints.
+     *
+     * @param Element $navPointElement The Element DTO for the current <navPoint>.
+     * @return Chapter
+     */
+    private function consumeNavPoint(Element $navPointElement): ?Chapter
     {
-        $chapter = new Chapter((string) $navPoint->navLabel->text, $navPoint['playOrder'], (string) $navPoint->content['src']);
+        $navPointContent = $navPointElement->getContent();
+        $navLabel = $navPointContent["navLabel"] ?? null;
 
-        foreach ($navPoint->navPoint as $child) {
-            $chapter->addChild($this->consumeNavPoint($child));
+        $title = $navLabel?->getContent()["text"]->getContent() ?? "";
+        $content = $navPointContent["content"] ?? null;
+        $order = (int) $navPointElement->getAttribute("playOrder");
+
+        $chapter = new Chapter(
+            $title,
+            $order,
+            $content?->getAttributes()["src"],
+        );
+
+        $this->addContentGetter($chapter);
+
+        // Check for nested <navPoint> children within the content array.
+        if (isset($navPointContent["navPoint"])) {
+            $childrenData = $navPointContent["navPoint"];
+
+            foreach ($childrenData->getContent() as $childElement) {
+                $chapter->addChild($this->consumeNavPoint($childElement));
+            }
         }
 
         return $chapter;
     }
 
+    /**
+     * Attaches a lazy-loading closure to an item for retrieving its content from the Zip archive.
+     *
+     * This method assumes the provided item has `href` and `setContent` members.
+     * For a Chapter, the `src` property would be used as the `href`.
+     *
+     * @param object $item An object like ManifestItem or Chapter.
+     */
+    private function addContentGetter(object $item): void
+    {
+        // To make this fully functional, the Chapter class should have a public `href`
+        // property (populated from its `src`) and a `setContent` method.
+        if (
+            null !== $this->resource &&
+            property_exists($item, "href") &&
+            method_exists($item, "setContent")
+        ) {
+            $resource = $this->resource;
+            $item->setContent(fn() => $resource->get($item->href));
+        }
+    }
 }

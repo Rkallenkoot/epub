@@ -14,7 +14,7 @@ namespace ePub\Tests;
 use ePub\Reader;
 use PHPUnit\Framework\TestCase;
 
-abstract class BaseTest extends TestCase
+abstract class BaseTestCase extends TestCase
 {
     /**
      * Locate a test fixture file
@@ -25,7 +25,7 @@ abstract class BaseTest extends TestCase
      */
     public function getFixturePath($name)
     {
-        return __DIR__.'/fixtures/' . $name;
+        return __DIR__ . '/fixtures/' . $name;
     }
 
     /**
@@ -39,7 +39,7 @@ abstract class BaseTest extends TestCase
     {
         return file_get_contents($this->getFixturePath($name));
     }
-    
+
     /**
      * Locates a fixture and returns the Package
      *
@@ -50,10 +50,10 @@ abstract class BaseTest extends TestCase
     public function getFixtureEpub($name)
     {
         $fixture = $this->getFixturePath($name);
-        
+
         $reader = new Reader();
         $epub   = $reader->load($fixture);
-        
+
         return $epub;
     }
 }

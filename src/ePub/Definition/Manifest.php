@@ -21,7 +21,7 @@ class Manifest extends Collection
     /**
      * @var array
      */
-    private $resources = array();
+    private $resources = [];
 
     /**
      * {@inheritDoc}
@@ -31,7 +31,7 @@ class Manifest extends Collection
         if (!($item instanceof ManifestItem)) {
             throw new InvalidArgumentException(sprintf(
                 'Expected instance of ePub\Definition\ManifestItem, got %s',
-                get_class($item)
+                $item::class
             ));
         }
 

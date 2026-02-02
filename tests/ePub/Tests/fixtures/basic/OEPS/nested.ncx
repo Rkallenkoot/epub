@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ncx:ncx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:dcms="http://www.dcms.com/"
+         xmlns:ncx="http://www.daisy.org/z3986/2005/ncx/"
+         version="2005-1">
+   <ncx:head>
+      <ncx:meta name="foo" content="bar"/>
+   </ncx:head>
+   <ncx:docTitle>
+      <ncx:text>Women Shall Not Rule</ncx:text>
+   </ncx:docTitle>
+   <ncx:navMap>
+      <ncx:navPoint playOrder="1" id="title">
+         <ncx:navLabel>
+            <ncx:text>Title Page</ncx:text>
+         </ncx:navLabel>
+         <ncx:content src="1-A01-fm_frontmatter.html"/>
+      </ncx:navPoint>
+      <ncx:navPoint playOrder="2" id="d42e8">
+         <ncx:navLabel>
+            <ncx:text>List of Figures</ncx:text>
+         </ncx:navLabel>
+         <ncx:content src="3-B02-listfigs.html"/>
+      </ncx:navPoint>
+      <ncx:navPoint playOrder="3" id="d42e9">
+         <ncx:navLabel>
+            <ncx:text>Acknowledgments</ncx:text>
+         </ncx:navLabel>
+         <ncx:content src="4-B03-ackns.html"/>
+      </ncx:navPoint>
+      <ncx:navPoint playOrder="4" id="d42e10">
+         <ncx:navLabel>
+            <ncx:text>Prologue</ncx:text>
+         </ncx:navLabel>
+         <ncx:content src="5-B04-prologue.html"/>
+      </ncx:navPoint>
+      <ncx:navPoint playOrder="5" id="d42e11">
+         <ncx:navLabel>
+            <ncx:text>Early China, 1250 BCE–317 CE</ncx:text>
+         </ncx:navLabel>
+         <ncx:content src="6-C01a-partI.html"/>
+         <ncx:navPoint playOrder="6" id="d42e12">
+            <ncx:navLabel>
+               <ncx:text>The Institution and Values of Royal Polygamy</ncx:text>
+            </ncx:navLabel>
+            <ncx:content src="6-C01a-partI.html#d42e12"/>
+         </ncx:navPoint>
+         <ncx:navPoint playOrder="7" id="d42e13">
+            <ncx:navLabel>
+               <ncx:text>Empresses and Consorts of the Former Han, 206 BCE–25 CE</ncx:text>
+            </ncx:navLabel>
+            <ncx:content src="6-C01a-partI.html#d42e13"/>
+         </ncx:navPoint>
+         <ncx:navPoint playOrder="8" id="d42e14">
+            <ncx:navLabel>
+               <ncx:text>The Later Han to the End of the Western Jin, 25–317</ncx:text>
+            </ncx:navLabel>
+            <ncx:content src="6-C01a-partI.html#d42e14"/>
+         </ncx:navPoint>
+         <ncx:navPoint playOrder="9" id="d42e15">
+            <ncx:navLabel>
+               <ncx:text>Conclusion to Part I</ncx:text>
+            </ncx:navLabel>
+            <ncx:content src="6-C01a-partI.html#d42e15"/>
+         </ncx:navPoint>
+      </ncx:navPoint>
+   </ncx:navMap>
+</ncx:ncx>

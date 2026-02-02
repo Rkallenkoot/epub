@@ -11,23 +11,23 @@
 
 namespace ePub\Definition;
 
-use ePub\Definition\ManifestItem;
-
 class Package
 {
     public $version;
 
     public $opfDirectory;
 
-    public $metadata;
+    public Metadata $metadata;
 
-    public $manifest;
+    public Manifest $manifest;
 
-    public $spine;
+    public Spine $spine;
 
-    public $guide;
+    public Guide $guide;
 
-    public $navigation;
+    public Navigation $navigation;
+
+    public ?PageList $pageList = null;
 
     public function __construct()
     {
@@ -38,28 +38,38 @@ class Package
         $this->navigation = new Navigation();
     }
 
-    public function getMetadata()
+    public function getMetadata(): Metadata
     {
         return $this->metadata;
     }
 
-    public function getManifest()
+    public function getManifest(): Manifest
     {
         return $this->manifest;
     }
 
-    public function getSpine()
+    public function getSpine(): Spine
     {
         return $this->spine;
     }
 
-    public function getGuide()
+    public function getGuide(): Guide
     {
         return $this->guide;
     }
 
-    public function getNavigation()
+    public function getNavigation(): Navigation
     {
         return $this->navigation;
+    }
+
+    public function setPageList(PageList $pageList): void
+    {
+        $this->pageList = $pageList;
+    }
+
+    public function getPageList(): ?PageList
+    {
+        return $this->pageList;
     }
 }

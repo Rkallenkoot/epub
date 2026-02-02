@@ -25,14 +25,11 @@ use ePub\NamespaceRegistry;
 
 class TocResourceDumper
 {
-	private $package;
+	public function __construct(private Package $package)
+    {
+    }
 
-	public function __construct(Package $package)
-	{
-		$this->package = $package;
-	}
-
-	public function dump(array $options = array())
+	public function dump(array $options = [])
 	{
 		$dom = new \DOMDocument('1.0');
 		$dom->formatOutput = true;
@@ -63,12 +60,12 @@ EOT
 	{
 		$head = $dom->createElement('head');
 		
-		$tags = array(
+		$tags = [
 			'dtb:uid' => $this->package->metadata->getValue('identifier'),
 			'dtb:depth' => 1,
 			'dtb:totalPageCount' => 0,
 			'dtb:maxPageNumber' => 0
-		);
+		];
 		
 		foreach ($tags as $name => $value) {
 			$meta = $dom->createElement('meta');

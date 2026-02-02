@@ -17,7 +17,20 @@ class NamespaceRegistry
 
     const NAMESPACE_OPF = "http://www.idpf.org/2007/opf";
 
+    const NAMESPACE_EPUB = "http://www.idpf.org/2007/ops";
+
     const PREFIX_DC = "dc";
 
     const PREFIX_OPF = "opf";
+
+    const PREFIX_EPUB = "epub";
+
+    public static function getNamespaces()
+    {
+        return [
+            self::PREFIX_DC => self::NAMESPACE_DC,
+            self::PREFIX_OPF => self::NAMESPACE_OPF,
+            self::PREFIX_EPUB => self::NAMESPACE_EPUB,
+        ];
+    }
 }
